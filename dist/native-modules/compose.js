@@ -86,12 +86,13 @@ export var Compose = (_dec = customElement('compose'), _dec2 = inject(DOM.Elemen
     this.changes.view = this.view;
     this.changes.viewModel = this.viewModel;
     this.changes.model = this.model;
-    processChanges(this);
+    if (!this.pendingTask) {
+      processChanges(this);
+    }
   };
 
   Compose.prototype.unbind = function unbind() {
     this.changes = Object.create(null);
-    this.pendingTask = null;
     this.bindingContext = null;
     this.overrideContext = null;
     var returnToCache = true;
@@ -184,10 +185,6 @@ function processChanges(composer) {
   composer.pendingTask = composer.pendingTask.catch(function (e) {
     logger.error(e);
   }).then(function () {
-    if (!composer.pendingTask) {
-      return;
-    }
-
     composer.pendingTask = null;
     if (!isEmpty(composer.changes)) {
       processChanges(composer);

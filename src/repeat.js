@@ -135,7 +135,9 @@ export class Repeat extends AbstractRepeater {
     if (!this.isOneTime && !this._observeInnerCollection()) {
       this._observeCollection();
     }
+    this.ignoreMutation = true;
     this.strategy.instanceChanged(this, items);
+    this.ignoreMutation = false;
   }
 
   _getInnerCollection() {
@@ -151,6 +153,9 @@ export class Repeat extends AbstractRepeater {
   */
   handleCollectionMutated(collection, changes) {
     if (!this.collectionObserver) {
+      return;
+    }
+    if (this.ignoreMutation) {
       return;
     }
     this.strategy.instanceMutated(this, collection, changes);

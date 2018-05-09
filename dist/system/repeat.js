@@ -176,7 +176,9 @@ System.register(['aurelia-dependency-injection', 'aurelia-binding', 'aurelia-tem
           if (!this.isOneTime && !this._observeInnerCollection()) {
             this._observeCollection();
           }
+          this.ignoreMutation = true;
           this.strategy.instanceChanged(this, items);
+          this.ignoreMutation = false;
         };
 
         Repeat.prototype._getInnerCollection = function _getInnerCollection() {
@@ -189,6 +191,9 @@ System.register(['aurelia-dependency-injection', 'aurelia-binding', 'aurelia-tem
 
         Repeat.prototype.handleCollectionMutated = function handleCollectionMutated(collection, changes) {
           if (!this.collectionObserver) {
+            return;
+          }
+          if (this.ignoreMutation) {
             return;
           }
           this.strategy.instanceMutated(this, collection, changes);

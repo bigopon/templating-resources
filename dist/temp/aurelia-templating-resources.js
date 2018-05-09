@@ -767,12 +767,13 @@ var Compose = exports.Compose = (_dec10 = (0, _aureliaTemplating.customElement)(
     this.changes.view = this.view;
     this.changes.viewModel = this.viewModel;
     this.changes.model = this.model;
-    processChanges(this);
+    if (!this.pendingTask) {
+      processChanges(this);
+    }
   };
 
   Compose.prototype.unbind = function unbind() {
     this.changes = Object.create(null);
-    this.pendingTask = null;
     this.bindingContext = null;
     this.overrideContext = null;
     var returnToCache = true;
@@ -866,10 +867,6 @@ function processChanges(composer) {
   composer.pendingTask = composer.pendingTask.catch(function (e) {
     logger.error(e);
   }).then(function () {
-    if (!composer.pendingTask) {
-      return;
-    }
-
     composer.pendingTask = null;
     if (!isEmpty(composer.changes)) {
       processChanges(composer);
@@ -1947,7 +1944,9 @@ var Repeat = exports.Repeat = (_dec26 = (0, _aureliaTemplating.customAttribute)(
     if (!this.isOneTime && !this._observeInnerCollection()) {
       this._observeCollection();
     }
+    this.ignoreMutation = true;
     this.strategy.instanceChanged(this, items);
+    this.ignoreMutation = false;
   };
 
   Repeat.prototype._getInnerCollection = function _getInnerCollection() {
@@ -1960,6 +1959,9 @@ var Repeat = exports.Repeat = (_dec26 = (0, _aureliaTemplating.customAttribute)(
 
   Repeat.prototype.handleCollectionMutated = function handleCollectionMutated(collection, changes) {
     if (!this.collectionObserver) {
+      return;
+    }
+    if (this.ignoreMutation) {
       return;
     }
     this.strategy.instanceMutated(this, collection, changes);

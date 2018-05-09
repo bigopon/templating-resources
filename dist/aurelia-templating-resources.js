@@ -766,7 +766,9 @@ export class Compose {
     this.changes.view = this.view;
     this.changes.viewModel = this.viewModel;
     this.changes.model = this.model;
-    processChanges(this);
+    if (!this.pendingTask) {
+      processChanges(this);
+    }
   }
 
   /**
@@ -774,7 +776,6 @@ export class Compose {
   */
   unbind() {
     this.changes = Object.create(null);
-    this.pendingTask = null;
     this.bindingContext = null;
     this.overrideContext = null;
     let returnToCache = true;
@@ -870,11 +871,6 @@ function processChanges(composer: Compose) {
   composer.pendingTask = composer.pendingTask.catch(e => {
     logger.error(e);
   }).then(() => {
-    if (!composer.pendingTask) {
-      // the element has been unbound
-      return;
-    }
-
     composer.pendingTask = null;
     if (!isEmpty(composer.changes)) {
       processChanges(composer);
@@ -2147,7 +2143,9 @@ export class Repeat extends AbstractRepeater {
     if (!this.isOneTime && !this._observeInnerCollection()) {
       this._observeCollection();
     }
+    this.ignoreMutation = true;
     this.strategy.instanceChanged(this, items);
+    this.ignoreMutation = false;
   }
 
   _getInnerCollection() {
@@ -2163,6 +2161,9 @@ export class Repeat extends AbstractRepeater {
   */
   handleCollectionMutated(collection, changes) {
     if (!this.collectionObserver) {
+      return;
+    }
+    if (this.ignoreMutation) {
       return;
     }
     this.strategy.instanceMutated(this, collection, changes);
