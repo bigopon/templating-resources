@@ -118,6 +118,8 @@ export var Repeat = (_dec = customAttribute('repeat'), _dec2 = inject(BoundViewF
   };
 
   Repeat.prototype.itemsChanged = function itemsChanged() {
+    var _this2 = this;
+
     this._unsubscribeCollection();
 
     if (!this.scope) {
@@ -135,7 +137,9 @@ export var Repeat = (_dec = customAttribute('repeat'), _dec2 = inject(BoundViewF
     }
     this.ignoreMutation = true;
     this.strategy.instanceChanged(this, items);
-    this.ignoreMutation = false;
+    this.observerLocator.taskQueue.queueMicroTask(function () {
+      _this2.ignoreMutation = false;
+    });
   };
 
   Repeat.prototype._getInnerCollection = function _getInnerCollection() {
@@ -157,7 +161,7 @@ export var Repeat = (_dec = customAttribute('repeat'), _dec2 = inject(BoundViewF
   };
 
   Repeat.prototype.handleInnerCollectionMutated = function handleInnerCollectionMutated(collection, changes) {
-    var _this2 = this;
+    var _this3 = this;
 
     if (!this.collectionObserver) {
       return;
@@ -169,7 +173,7 @@ export var Repeat = (_dec = customAttribute('repeat'), _dec2 = inject(BoundViewF
     this.ignoreMutation = true;
     var newItems = this.sourceExpression.evaluate(this.scope, this.lookupFunctions);
     this.observerLocator.taskQueue.queueMicroTask(function () {
-      return _this2.ignoreMutation = false;
+      return _this3.ignoreMutation = false;
     });
 
     if (newItems === this.items) {

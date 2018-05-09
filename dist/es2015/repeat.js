@@ -124,7 +124,9 @@ export let Repeat = (_dec = customAttribute('repeat'), _dec2 = inject(BoundViewF
     }
     this.ignoreMutation = true;
     this.strategy.instanceChanged(this, items);
-    this.ignoreMutation = false;
+    this.observerLocator.taskQueue.queueMicroTask(() => {
+      this.ignoreMutation = false;
+    });
   }
 
   _getInnerCollection() {

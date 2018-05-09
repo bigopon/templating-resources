@@ -137,7 +137,9 @@ export class Repeat extends AbstractRepeater {
     }
     this.ignoreMutation = true;
     this.strategy.instanceChanged(this, items);
-    this.ignoreMutation = false;
+    this.observerLocator.taskQueue.queueMicroTask(() => {
+      this.ignoreMutation = false;
+    });
   }
 
   _getInnerCollection() {
